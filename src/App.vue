@@ -8,7 +8,6 @@ export default{
   data(){
     return{
       inputText: "",
-      apiKey:"",
       voiceName:"zh-CN-XiaoxiaoNeural",
       out:{
         text:"",
@@ -19,12 +18,28 @@ export default{
         audio:null,
       },
       cfg:{
+        apiKey:"",
+        apiRegion:"",
+        speed:0.8,
+        pitch:0.0
+      },
+      cfg_tmp:{
+        apiKey:"",
+        apiRegion:"",
         speed:0.8,
         pitch:0.0
       }
     }
   },
   methods:{
+    isCfgChanged(){
+      let res = false;
+      res = res || this.cfg_tmp.apiKey != this.cfg.apiKey
+      res = res || this.cfg_tmp.apiRegion != this.cfg.apiRegion
+      res = res || this.cfg_tmp.pitch != this.cfg.pitch
+      res = res || this.cfg_tmp.speed != this.cfg.speed
+      return res
+    },
     convert(){
       console.log(this.inputText);
       if (this.inputText.length>20 || this.inputText.length<1){
@@ -53,7 +68,7 @@ export default{
         if (input.length>20 || input.length<1){
           alert("文章は1文字以上20文字以内でなければなりません。")
           return;
-        }else if(input===this.out_prev.text){
+        }else if(input===this.out_prev.text && !this.isCfgChanged()){
           console.log("バッファから読み上げ実行",this.out.audio);
           this.playSound(this.out.audio);
           return;
@@ -66,8 +81,8 @@ export default{
         // replace with your own subscription key,
         // service region (e.g., "westus"), and
         // the name of the file you save the synthesized audio.
-        const subscriptionKey = this.apiKey;
-        const serviceRegion = "japaneast"; // e.g., "westus"
+        const subscriptionKey = this.cfg.apiKey;
+        const serviceRegion = this.cfg.apiRegion; // e.g., "westus"
       
         // we are done with the setup
       
@@ -143,6 +158,10 @@ export default{
               else{
                 this.out.audio=result.audioData
                 this.out_prev.audio = result.audioData
+                this.cfg_tmp.apiKey = this.cfg.apiKey
+                this.cfg_tmp.apiRegion = this.cfg.apiRegion
+                this.cfg_tmp.pitch = this.cfg.pitch
+                this.cfg_tmp.speed = this.cfg.speed
                 console.log("result:",result)
                 console.log("audiodata:", this.out.audio)
                 synthesizer.close();
@@ -151,6 +170,7 @@ export default{
             error => {
                 console.log(error);
                 synthesizer.close();
+                alert("音声合成に失敗しました。正しいAPIキーを入力してください")
             });
         }
       }
@@ -179,8 +199,10 @@ export default{
       <section class="overflow-hidden my-1 lg:my-0">
         <div class="border-gray-300 border rounded-lg lg:border-b-0 bg-gray-200 px-6 py-3">
           <div class="text-lg font-bold">音声合成設定</div>
-          <span>APIKey: </span>
-          <input v-model="apiKey" size="10" name="input" type="password" class="bg-gray-0 text-gray-800 border focus:ring ring-indigo-300 rounded outline-none transition duration-100 p-0">
+          <span> 地域: </span>
+          <input v-model="cfg.apiRegion" size="10" name="input" type="text" class="bg-gray-0 text-gray-800 border focus:ring ring-indigo-300 rounded outline-none transition duration-100 p-0" />
+          <span> APIキー: </span>
+          <input v-model="cfg.apiKey" size="10" name="input" type="password" class="bg-gray-0 text-gray-800 border focus:ring ring-indigo-300 rounded outline-none transition duration-100 p-0" />
         </div>
       </section>
       <section class="flex flex-col lg:border-gray-300 lg:border rounded-lg lg:flex-row justify-between lg:gap-0 gap-4 overflow-hidden">
@@ -200,7 +222,7 @@ export default{
             <div class="text-3xl font-bold sc-area">{{ out.text || '　'}}</div>
           </div>
           <div class="mt-auto">
-            <button class="inline-block custom-btn" @click="tts()">音声</button>
+            <button v-if="out.text" class="inline-block custom-btn" @click="tts()">音声</button>
           </div>
         </div>
       </section>

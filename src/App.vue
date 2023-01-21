@@ -174,7 +174,7 @@ export default{
   <main>
     <div class="mx-auto px-4 py-4 max-w-screen-2xl">
       <h1 class="text-2xl lg:text-5xl font-bold my-4">
-        中国語→ピンイン+音声変換
+        中国語→ピンイン+音声に変換
       </h1>
       <section class="overflow-hidden my-1 lg:my-0">
         <div class="border-gray-300 border rounded-lg lg:border-b-0 bg-gray-200 px-6 py-3">
